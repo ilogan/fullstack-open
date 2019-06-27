@@ -19,12 +19,26 @@ const App = ({ anecdotes }) => {
     setVotes(newVotes);
   };
 
+  const findMaxIndex = arr => {
+    let maxIndex = 0;
+    arr.forEach((n, i) => {
+      if (n > arr[maxIndex]) {
+        maxIndex = i;
+      }
+    });
+    return maxIndex;
+  };
+
   return (
     <div>
+      <h1>Anecdote of the day</h1>
       <div>{anecdotes[selected]}</div>
       <div>has {votes[selected]} votes</div>
       <Button onClick={castVote} text="vote" />
       <Button onClick={randomSelect} text="next anecdote" />
+      <h1>Anecdote with most votes</h1>
+      <div>{anecdotes[findMaxIndex(votes)]}</div>
+      <div>has {votes[findMaxIndex(votes)]} votes</div>
     </div>
   );
 };
