@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 
 const App = () => {
-  // add button should add a new person to the list
   const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-1234567" }
+    { name: "Arto Hellas", number: "040-123456" }
   ]);
-  // new name should be the name within form up until submit
   const [newName, setNewName] = useState("");
-
   const [newNumber, setNewNumber] = useState("");
+  const [filter, setFilter] = useState("");
 
   const handleNameChange = event => {
     setNewName(event.target.value);
@@ -16,6 +14,10 @@ const App = () => {
 
   const handleNumberChange = event => {
     setNewNumber(event.target.value);
+  };
+
+  const handleFilterChange = event => {
+    setFilter(event.target.value);
   };
 
   const handleClick = event => {
@@ -28,15 +30,21 @@ const App = () => {
     setNewNumber("");
   };
 
-  const personList = persons.map(person => (
-    <div key={person.name}>
-      {person.name} {person.number}
-    </div>
-  ));
+  const personList = persons
+    .filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
+    .map(person => (
+      <div key={person.name}>
+        {person.name} {person.number}
+      </div>
+    ));
 
   return (
     <div>
       <h2>Phonebook</h2>
+      <div>
+        filter shown with <input value={filter} onChange={handleFilterChange} />
+      </div>
+      <h2>Add new</h2>
       <form>
         <div>
           name: <input value={newName} onChange={handleNameChange} />
