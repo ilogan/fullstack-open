@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 
 import CountryForm from "./components/CountryForm";
-import CountryList from "./components/CountryList";
+import CountryContainer from "./components/CountryContainer";
 
 const App = () => {
   const [countriesAPI, setCountriesAPI] = useState([]);
@@ -26,10 +26,17 @@ const App = () => {
     );
   };
 
+  const handleClick = country => {
+    setSelectedCountries([country]);
+  };
+
   return (
     <div>
       <CountryForm value={filter} handleChange={handleChange} />
-      <CountryList selectedCountries={selectedCountries} />
+      <CountryContainer
+        selectedCountries={selectedCountries}
+        handleClick={handleClick}
+      />
     </div>
   );
 };

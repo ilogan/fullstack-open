@@ -14,7 +14,7 @@ const CountryView = ({ name, capital, population, languages, flag }) => {
       <div>population {population}</div>
       <h2>languages</h2>
       <ul>{renderLanguages()}</ul>
-      <img src={flag} style={{ width: "300px" }} />
+      <img src={flag} style={{ width: "300px" }} alt="Country flag" />
     </div>
   );
 };
