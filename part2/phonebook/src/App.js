@@ -30,11 +30,33 @@ const App = () => {
     setNewNumber(event.target.value);
   };
 
-  const handleClick = event => {
-    event.preventDefault();
+  const updatePerson = existingPerson => {
+    const changedPerson = { ...existingPerson, number: newNumber };
+    personService
+      .update(changedPerson.id, changedPerson)
+      .then(returnedPerson =>
+        setPersons(
+          persons.map(person =>
+            person.id !== changedPerson.id ? person : returnedPerson
+          )
+        )
+      );
+  };
 
-    if (persons.find(person => person.name === newName)) {
-      return alert(`${newName} is already added to the phonebook`);
+  const handleAddClick = event => {
+    event.preventDefault();
+    const existingPerson = persons.find(person => person.name === newName);
+    if (existingPerson) {
+      const msg = `${
+        existingPerson.name
+      } is already added to the phonebook, replace the old number with a new one?`;
+
+      if (window.confirm(msg)) {
+        updatePerson(existingPerson);
+        setNewName("");
+        setNewNumber("");
+      }
+      return;
     }
 
     const newPerson = {
@@ -71,7 +93,7 @@ const App = () => {
         newNumber={newNumber}
         handleNameChange={handleNameChange}
         handleNumberChange={handleNumberChange}
-        handleClick={handleClick}
+        handleClick={handleAddClick}
       />
       <h2>Numbers</h2>
       <PersonList
