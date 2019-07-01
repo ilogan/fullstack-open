@@ -13,6 +13,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
 
+  const url = `http://localhost:3001/persons`;
+
   useEffect(() => {
     axios.get("http://localhost:3001/persons").then(response => {
       setPersons(response.data);
@@ -33,12 +35,22 @@ const App = () => {
 
   const handleClick = event => {
     event.preventDefault();
+
     if (persons.find(person => person.name === newName)) {
       return alert(`${newName} is already added to the phonebook`);
     }
-    setPersons(persons.concat({ name: newName, number: newNumber }));
-    setNewName("");
-    setNewNumber("");
+
+    const newPerson = {
+      name: newName,
+      number: newNumber
+    };
+
+    axios.post(url, newPerson).then(response => {
+      console.log(response.data);
+      setPersons(persons.concat(response.data));
+      setNewName("");
+      setNewNumber("");
+    });
   };
 
   return (
