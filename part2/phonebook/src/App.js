@@ -7,9 +7,7 @@ import PersonForm from "./components/PersonForm";
 import PersonList from "./components/PersonList";
 
 const App = () => {
-  const [persons, setPersons] = useState([
-    { name: "Arto Hellas", number: "040-123456" }
-  ]);
+  const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
@@ -51,6 +49,18 @@ const App = () => {
     });
   };
 
+  const handleDeleteClick = id => {
+    const person = persons.find(person => person.id === id);
+
+    if (window.confirm(`Delete ${person.name} with id ${id}?`)) {
+      personService.deletePerson(id).then(status => {
+        if (status === 200) {
+          setPersons(persons.filter(person => person.id !== id));
+        }
+      });
+    }
+  };
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -64,7 +74,11 @@ const App = () => {
         handleClick={handleClick}
       />
       <h2>Numbers</h2>
-      <PersonList persons={persons} filter={filter} />
+      <PersonList
+        persons={persons}
+        filter={filter}
+        handleClick={handleDeleteClick}
+      />
     </div>
   );
 };
