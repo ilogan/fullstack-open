@@ -5,19 +5,41 @@ import personService from "./services/persons";
 import Filter from "./components/Filter";
 import PersonForm from "./components/PersonForm";
 import PersonList from "./components/PersonList";
+import Notification from "./components/Notification";
+
+import "./index.css";
 
 const App = () => {
+  /* STATE MANAGEMENT */
   const [persons, setPersons] = useState([]);
   const [newName, setNewName] = useState("");
   const [newNumber, setNewNumber] = useState("");
   const [filter, setFilter] = useState("");
+  const [message, setMessage] = useState({ content: null, success: false });
 
+  /* MOUNTING */
   useEffect(() => {
     personService.getAll().then(initialPersons => {
       setPersons(initialPersons);
     });
   }, []);
 
+  /*  MESSAGE UTILITIES */
+  const successTimeout = (message, seconds) => {
+    setMessage({ content: message, success: true });
+    setTimeout(() => {
+      setMessage({ content: null, success: false });
+    }, seconds * 1000);
+  };
+
+  const errorTimeout = (message, seconds) => {
+    setMessage({ content: message, success: false });
+    setTimeout(() => {
+      setMessage({ content: null, success: false });
+    }, seconds * 1000);
+  };
+
+  /* FORM HANDLING */
   const handleFilterChange = event => {
     setFilter(event.target.value);
   };
@@ -30,17 +52,21 @@ const App = () => {
     setNewNumber(event.target.value);
   };
 
+  /* CREATE AND UPDATE */
   const updatePerson = existingPerson => {
     const changedPerson = { ...existingPerson, number: newNumber };
     personService
       .update(changedPerson.id, changedPerson)
-      .then(returnedPerson =>
+      .then(returnedPerson => {
         setPersons(
           persons.map(person =>
-            person.id !== changedPerson.id ? person : returnedPerson
+            person.id !== returnedPerson.id ? person : returnedPerson
           )
-        )
-      );
+        );
+        successTimeout(`Updated ${returnedPerson.name}`, 5);
+        setNewName("");
+        setNewNumber("");
+      });
   };
 
   const handleAddClick = event => {
@@ -53,8 +79,6 @@ const App = () => {
 
       if (window.confirm(msg)) {
         updatePerson(existingPerson);
-        setNewName("");
-        setNewNumber("");
       }
       return;
     }
@@ -66,26 +90,29 @@ const App = () => {
 
     personService.create(newPerson).then(returnedPerson => {
       setPersons(persons.concat(returnedPerson));
+      successTimeout(`Created ${returnedPerson.name}`, 5);
       setNewName("");
       setNewNumber("");
     });
   };
 
+  /* DELETE */
   const handleDeleteClick = id => {
     const person = persons.find(person => person.id === id);
 
     if (window.confirm(`Delete ${person.name} with id ${id}?`)) {
       personService.deletePerson(id).then(status => {
-        if (status === 200) {
-          setPersons(persons.filter(person => person.id !== id));
-        }
+        setPersons(persons.filter(person => person.id !== id));
+        successTimeout(`Deleted ${person.name}`, 5);
       });
     }
   };
 
+  /* RENDER */
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={message} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>Add new</h2>
       <PersonForm
