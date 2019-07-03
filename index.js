@@ -43,17 +43,25 @@ app.get("/api/persons/:id", (req, res) => {
   }
 });
 
+app.delete("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  persons = persons.filter(note => note.id !== id);
+  res.status(204).end();
+});
+
+app.post("/api/persons", (req, res) => {
+  const id = Math.floor(Math.random() * 1000000000);
+  const person = { ...req.body, id };
+
+  persons = persons.concat(person);
+  res.json(person);
+});
+
 app.get("/info", (req, res) => {
   res.send(
     `<p>Phonebook has info for ${persons.length} people</p>
     <p>${Date()}</p>`
   );
-});
-
-app.delete("/api/persons/:id", (req, res) => {
-  const id = Number(req.params.id);
-  persons = persons.filter(note => note.id !== id);
-  res.status(204).end();
 });
 
 app.listen(port, () => {
