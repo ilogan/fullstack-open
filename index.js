@@ -51,10 +51,24 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (req, res) => {
   const id = Math.floor(Math.random() * 1000000000);
-  const person = { ...req.body, id };
+  const person = {
+    name: req.body.name,
+    number: req.body.number,
+    id
+  };
+  const personExists = persons.find(p => p.name === person.name);
 
+  if (!person.name) {
+    return res.status(400).json({ error: "name is missing" });
+  } else if (!person.number) {
+    return res.status(400).json({ error: "number is missing" });
+  } else if (personExists) {
+    return res
+      .status(400)
+      .json({ error: `${person.name} already exists in phonebook` });
+  }
   persons = persons.concat(person);
-  res.json(person);
+  res.status(201).json(person);
 });
 
 app.get("/info", (req, res) => {
