@@ -30,15 +30,13 @@ app.use(express.json());
 app.use(cors());
 app.use(express.static("build"));
 
-const requestLogger = (req, res, next) => {
-  console.log("Method: ", req.method);
-  console.log("Path: ", req.path);
-  console.log("Body: ", req.body);
-  console.log("----");
-  next();
-};
+morgan.token("body", (req, res) => {
+  return JSON.stringify(req.body);
+});
 
-app.use(requestLogger);
+app.use(
+  morgan(":method :url :status :res[content-length] - :response-time ms :body")
+);
 
 app.get("/", (req, res) => {
   res.send("<h1>Hello World</h1>");
