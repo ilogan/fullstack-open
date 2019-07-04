@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const baseURL = "/notes";
+const baseURL = "/api/notes";
 
 const getAll = () => {
   const request = axios.get(baseURL);
