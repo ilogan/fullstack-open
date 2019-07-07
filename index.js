@@ -1,9 +1,30 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
+const mongoose = require("mongoose");
+require("dotenv").config();
 
 const app = express();
+const url = process.env.MONGO_URL;
 const PORT = process.env.PORT || 3001;
+
+mongoose.connect(url, { useNewUrlParser: true });
+
+const noteSchema = new mongoose.Schema({
+  content: String,
+  date: Date,
+  important: Boolean
+});
+
+noteSchema.set("toJSON", {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString();
+    delete returnedObject._id;
+    delete returnedObject.__v;
+  }
+});
+
+const Note = mongoose.model("Note", noteSchema);
 
 let notes = [
   {
@@ -42,8 +63,14 @@ app.get("/", (req, res) => {
   res.send("<h1>Hello World</h1>");
 });
 
-app.get("/api/notes", (req, res) => {
-  res.json(notes);
+app.get("/api/notes", async (req, res) => {
+  try {
+    const notes = await Note.find({});
+    console.log(notes);
+    res.json(notes.map(note => note.toJSON()));
+  } catch (e) {
+    console.log(e.message);
+  }
 });
 
 app.get("/api/notes/:id", (req, res) => {
