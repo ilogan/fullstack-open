@@ -65,25 +65,20 @@ app.delete("/api/persons/:id", (req, res) => {
 });
 
 app.post("/api/persons", (req, res) => {
-  const id = Math.floor(Math.random() * 1000000000);
-  const person = {
-    name: req.body.name,
-    number: req.body.number,
-    id
-  };
-  const personExists = persons.find(p => p.name === person.name);
-
-  if (!person.name) {
+  if (!req.body.name) {
     return res.status(400).json({ error: "name is missing" });
-  } else if (!person.number) {
+  } else if (!req.body.number) {
     return res.status(400).json({ error: "number is missing" });
-  } else if (personExists) {
-    return res
-      .status(400)
-      .json({ error: `${person.name} already exists in phonebook` });
   }
-  persons = persons.concat(person);
-  res.status(201).json(person);
+
+  const person = new Person({
+    name: req.body.name,
+    number: req.body.number
+  });
+
+  person.save().then(savedPerson => {
+    res.json(savedPerson.toJSON());
+  });
 });
 
 app.get("/info", (req, res) => {
