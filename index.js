@@ -1,30 +1,12 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-const mongoose = require("mongoose");
-require("dotenv").config();
+
+const Note = require("./models/note");
 
 const app = express();
-const url = process.env.MONGO_URL;
-const PORT = process.env.PORT || 3001;
-
-mongoose.connect(url, { useNewUrlParser: true });
-
-const noteSchema = new mongoose.Schema({
-  content: String,
-  date: Date,
-  important: Boolean
-});
-
-noteSchema.set("toJSON", {
-  transform: (document, returnedObject) => {
-    returnedObject.id = returnedObject._id.toString();
-    delete returnedObject._id;
-    delete returnedObject.__v;
-  }
-});
-
-const Note = mongoose.model("Note", noteSchema);
+const PORT = process.env.PORT;
 
 let notes = [
   {
