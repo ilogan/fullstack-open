@@ -97,12 +97,17 @@ const App = () => {
       number: newNumber
     };
 
-    personService.create(newPerson).then(returnedPerson => {
-      setPersons(persons.concat(returnedPerson));
-      successTimeout(`Created ${returnedPerson.name}`, 5);
-      setNewName("");
-      setNewNumber("");
-    });
+    personService
+      .create(newPerson)
+      .then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson));
+        successTimeout(`Created ${returnedPerson.name}`, 5);
+        setNewName("");
+        setNewNumber("");
+      })
+      .catch(error => {
+        errorTimeout(error.response.data.error, 10);
+      });
   };
 
   /* DELETE */
