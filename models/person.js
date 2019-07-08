@@ -19,10 +19,12 @@ const personSchema = new mongoose.Schema({
     type: String,
     // setting unique (true OR false) creates index in mongodb
     // must drop index if already created to change
+    minlength: 3,
     unique: true
   },
   number: {
-    type: String
+    type: String,
+    minlength: 8
   }
 });
 
