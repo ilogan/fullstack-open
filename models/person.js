@@ -1,8 +1,11 @@
 const mongoose = require("mongoose");
+const uniqueValidator = require("mongoose-unique-validator");
 
 const url = process.env.MONGODB_URI;
 
+//stop depraction warnings
 mongoose.set("useFindAndModify", false);
+mongoose.set("useCreateIndex", true); // comes from setting unique
 
 // connect to database
 mongoose
@@ -12,9 +15,18 @@ mongoose
 
 // create person schema
 const personSchema = new mongoose.Schema({
-  name: String,
-  number: String
+  name: {
+    type: String,
+    // setting unique (true OR false) creates index in mongodb
+    // must drop index if already created to change
+    unique: true
+  },
+  number: {
+    type: String
+  }
 });
+
+personSchema.plugin(uniqueValidator);
 
 // set toJSON middleware (can be called explicitly or with JSON.stringify)
 personSchema.set("toJSON", {
