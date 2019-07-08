@@ -94,6 +94,31 @@ app.post("/api/persons", (req, res, next) => {
     .catch(error => next(error));
 });
 
+app.put("/api/persons/:id", (req, res, next) => {
+  console.log(req.body);
+  const person = {
+    name: req.body.name,
+    number: req.body.number
+  };
+
+  if (!person.name) {
+    return res.status(400).json({ error: "name is missing" });
+  }
+  if (!person.number) {
+    return res.status(400).json({ error: "number is missing" });
+  }
+
+  Person.findByIdAndUpdate(req.params.id, person, { new: true })
+    .then(updatedPerson => {
+      if (updatedPerson) {
+        res.json(updatedPerson.toJSON());
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch(error => next(error));
+});
+
 app.get("/info", (req, res) => {
   res.send(
     `<p>Phonebook has info for ${persons.length} people</p>
