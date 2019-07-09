@@ -12,7 +12,7 @@ app.use(express.static("build"));
 app.use(express.json());
 app.use(cors());
 
-morgan.token("body", (req, res) => {
+morgan.token("body", req => {
   return JSON.stringify(req.body);
 });
 
@@ -79,7 +79,7 @@ app.put("/api/notes/:id", (req, res, next) => {
 /* DELETE */
 app.delete("/api/notes/:id", (req, res, next) => {
   Note.findByIdAndRemove(req.params.id)
-    .then(result => {
+    .then(() => {
       res.status(204).end();
     })
     .catch(error => next(error));
@@ -96,7 +96,7 @@ app.use(unknownEndpoint);
 const errorHandler = (error, req, res, next) => {
   console.error(error.messaage);
 
-  if (error.name === "CastError" && error.kind == "ObjectId") {
+  if (error.name === "CastError" && error.kind === "ObjectId") {
     return res.status(400).send({ error: "malformatted id" });
   } else if (error.name === "ValidationError") {
     return res.status(400).json({ error: error.message });

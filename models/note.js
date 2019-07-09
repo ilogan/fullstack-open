@@ -6,8 +6,8 @@ mongoose.set("useFindAndModify", false);
 
 mongoose
   .connect(url, { useNewUrlParser: true })
-  .then(result => console.log("connected to MongoDB"))
-  .catch(error => console.log(`error connecting to MongoDB:`, error.message));
+  .then(() => console.log("connected to MongoDB"))
+  .catch(error => console.log("error connecting to MongoDB:", error.message));
 
 const noteSchema = new mongoose.Schema({
   content: {
