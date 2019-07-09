@@ -10,8 +10,8 @@ mongoose.set("useCreateIndex", true); // comes from setting unique
 // connect to database
 mongoose
   .connect(url, { useNewUrlParser: true })
-  .then(result => console.log("connected to MongoDB"))
-  .catch(error => console.log(`error connecting to MongoDB:`, error.message));
+  .then(() => console.log("connected to MongoDB"))
+  .catch(error => console.log("error connecting to MongoDB:", error.message));
 
 // create person schema
 const personSchema = new mongoose.Schema({

@@ -10,11 +10,13 @@
     "deploy": "git push heroku master",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild-phonebook && npm run deploy",
     "logs:prod": "heroku logs --tail",
+    "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^6.0.1",
     "nodemon": "^1.19.1"
   },
   "dependencies": {
