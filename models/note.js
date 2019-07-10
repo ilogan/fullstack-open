@@ -1,14 +1,5 @@
 const mongoose = require("mongoose");
 
-const url = process.env.MONGO_URL;
-
-mongoose.set("useFindAndModify", false);
-
-mongoose
-  .connect(url, { useNewUrlParser: true })
-  .then(() => console.log("connected to MongoDB"))
-  .catch(error => console.log("error connecting to MongoDB:", error.message));
-
 const noteSchema = new mongoose.Schema({
   content: {
     type: String,
