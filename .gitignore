@@ -1,4 +1,5 @@
 node_modules
+.env
 
 part1/intro
 part1/courseinfo/node_modules
