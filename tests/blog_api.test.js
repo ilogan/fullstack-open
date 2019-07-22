@@ -27,6 +27,13 @@ test("correct number of blogs are returned as json", async () => {
   expect(dbBlogs.length).toBe(helper.initialBlogs.length);
 });
 
+test("unique id exists", async () => {
+  const response = await api.get("/api/blogs");
+
+  expect(response.body[0].id).toBeDefined();
+  expect(response.body[0]._id).not.toBeDefined();
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
