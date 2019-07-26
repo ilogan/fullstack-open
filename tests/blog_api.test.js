@@ -34,6 +34,27 @@ test("unique id exists", async () => {
   expect(response.body[0]._id).not.toBeDefined();
 });
 
+test("a valid  blog can be added", async () => {
+  const newBlog = {
+    title: "Test Note",
+    author: "Tester",
+    url: "http://lookatthistest.com",
+    likes: 777
+  };
+
+  await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  const dbBlogs = await helper.blogsInDb();
+  expect(dbBlogs.length).toBe(helper.initialBlogs.length + 1);
+
+  const contents = dbBlogs.map(b => b.title);
+  expect(contents).toContain("Test Note");
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
