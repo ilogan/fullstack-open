@@ -55,6 +55,28 @@ test("a valid  blog can be added", async () => {
   expect(contents).toContain("Test Note");
 });
 
+test("likes defaults to zero", async () => {
+  const newBlog = {
+    title: "This has no likes",
+    author: "Tester",
+    url: "test.com"
+  };
+
+  const response = await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(201)
+    .expect("Content-Type", /application\/json/);
+
+  // test likes from response
+  expect(response.body.likes).toBe(0);
+
+  // double check likes in database
+  const dbBlogs = await helper.blogsInDb();
+  const blogWithNoLikes = dbBlogs.find(b => b.title === "This has no likes");
+  expect(blogWithNoLikes.likes).toBe(0);
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
