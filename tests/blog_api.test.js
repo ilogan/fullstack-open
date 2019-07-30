@@ -77,6 +77,36 @@ test("likes defaults to zero", async () => {
   expect(blogWithNoLikes.likes).toBe(0);
 });
 
+test("blog must have a title", async () => {
+  const newBlog = {
+    url: "testUrl"
+  };
+
+  const response = await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(400);
+
+  expect(response.body.error).toBe(
+    "Blog validation failed: title: Path `title` is required."
+  );
+});
+
+test("blog must have a url", async () => {
+  const newBlog = {
+    title: "testTitle"
+  };
+
+  const response = await api
+    .post("/api/blogs")
+    .send(newBlog)
+    .expect(400);
+
+  expect(response.body.error).toBe(
+    "Blog validation failed: url: Path `url` is required."
+  );
+});
+
 afterAll(() => {
   mongoose.connection.close();
 });
