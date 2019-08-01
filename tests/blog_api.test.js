@@ -16,95 +16,128 @@ beforeEach(async () => {
   }
 });
 
-test("correct number of blogs are returned as json", async () => {
-  await api
-    .get("/api/blogs")
-    .expect(200)
-    .expect("Content-Type", /application\/json/);
+describe("with initial blogs saved", () => {
+  test("correct number of blogs are returned as json", async () => {
+    await api
+      .get("/api/blogs")
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
 
-  // compare helper blogs to blogs in database
-  const dbBlogs = await helper.blogsInDb();
-  expect(dbBlogs.length).toBe(helper.initialBlogs.length);
-});
+    // compare helper blogs to blogs in database
+    const dbBlogs = await helper.blogsInDb();
+    expect(dbBlogs.length).toBe(helper.initialBlogs.length);
+  });
 
-test("unique id exists", async () => {
-  const response = await api.get("/api/blogs");
+  test("unique id property exists", async () => {
+    const response = await api.get("/api/blogs");
 
-  expect(response.body[0].id).toBeDefined();
-  expect(response.body[0]._id).not.toBeDefined();
-});
+    expect(response.body[0].id).toBeDefined();
+    expect(response.body[0]._id).not.toBeDefined();
+  });
 
-test("a valid  blog can be added", async () => {
-  const newBlog = {
-    title: "Test Note",
-    author: "Tester",
-    url: "http://lookatthistest.com",
-    likes: 777
-  };
+  /*
+   *------------------------
+   *       POSTING
+   *------------------------
+   */
+  describe("posting a new blog", () => {
+    test("succeeds with valid data", async () => {
+      const newBlog = {
+        title: "Test Note",
+        author: "Tester",
+        url: "http://lookatthistest.com",
+        likes: 777
+      };
 
-  await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(201)
-    .expect("Content-Type", /application\/json/);
+      await api
+        .post("/api/blogs")
+        .send(newBlog)
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
 
-  const dbBlogs = await helper.blogsInDb();
-  expect(dbBlogs.length).toBe(helper.initialBlogs.length + 1);
+      const dbBlogs = await helper.blogsInDb();
+      expect(dbBlogs.length).toBe(helper.initialBlogs.length + 1);
 
-  const contents = dbBlogs.map(b => b.title);
-  expect(contents).toContain("Test Note");
-});
+      const contents = dbBlogs.map(b => b.title);
+      expect(contents).toContain("Test Note");
+    });
 
-test("likes defaults to zero", async () => {
-  const newBlog = {
-    title: "This has no likes",
-    author: "Tester",
-    url: "test.com"
-  };
+    test("likes property defaults to zero", async () => {
+      const newBlog = {
+        title: "This has no likes",
+        author: "Tester",
+        url: "test.com"
+      };
 
-  const response = await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(201)
-    .expect("Content-Type", /application\/json/);
+      const response = await api
+        .post("/api/blogs")
+        .send(newBlog)
+        .expect(201)
+        .expect("Content-Type", /application\/json/);
 
-  // test likes from response
-  expect(response.body.likes).toBe(0);
+      // test likes from response
+      expect(response.body.likes).toBe(0);
 
-  // double check likes in database
-  const dbBlogs = await helper.blogsInDb();
-  const blogWithNoLikes = dbBlogs.find(b => b.title === "This has no likes");
-  expect(blogWithNoLikes.likes).toBe(0);
-});
+      // double check likes in database
+      const dbBlogs = await helper.blogsInDb();
+      const blogWithNoLikes = dbBlogs.find(
+        b => b.title === "This has no likes"
+      );
+      expect(blogWithNoLikes.likes).toBe(0);
+    });
 
-test("blog must have a title", async () => {
-  const newBlog = {
-    url: "testUrl"
-  };
+    test("fails with 400 without title", async () => {
+      const newBlog = {
+        url: "testUrl"
+      };
 
-  const response = await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(400);
+      const response = await api
+        .post("/api/blogs")
+        .send(newBlog)
+        .expect(400);
 
-  expect(response.body.error).toBe(
-    "Blog validation failed: title: Path `title` is required."
-  );
-});
+      expect(response.body.error).toBe(
+        "Blog validation failed: title: Path `title` is required."
+      );
+    });
 
-test("blog must have a url", async () => {
-  const newBlog = {
-    title: "testTitle"
-  };
+    test("fails with 400 without  url", async () => {
+      const newBlog = {
+        title: "testTitle"
+      };
 
-  const response = await api
-    .post("/api/blogs")
-    .send(newBlog)
-    .expect(400);
+      const response = await api
+        .post("/api/blogs")
+        .send(newBlog)
+        .expect(400);
 
-  expect(response.body.error).toBe(
-    "Blog validation failed: url: Path `url` is required."
-  );
+      expect(response.body.error).toBe(
+        "Blog validation failed: url: Path `url` is required."
+      );
+    });
+  });
+
+  /*
+   *------------------------
+   *       DELETING
+   *------------------------
+   */
+  describe("deleting a blog", () => {
+    test("valid blog is deleted with status 200", async () => {
+      const initialDbBlogs = await helper.blogsInDb();
+      const blogToDelete = initialDbBlogs[0];
+
+      await api.delete(`/api/blogs/${blogToDelete.id}`).expect(200);
+
+      const modifiedDbBlogs = await helper.blogsInDb();
+
+      expect(modifiedDbBlogs.length).toBe(initialDbBlogs.length - 1);
+
+      const titles = modifiedDbBlogs.map(b => b.title);
+
+      expect(titles).not.toContain(blogToDelete.title);
+    });
+  });
 });
 
 afterAll(() => {
