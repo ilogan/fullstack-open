@@ -138,6 +138,27 @@ describe("with initial blogs saved", () => {
       expect(titles).not.toContain(blogToDelete.title);
     });
   });
+  /*
+   *------------------------
+   *       UPDATING
+   *------------------------
+   */
+  describe("updating a specific blog", () => {
+    test("succeeds with valid id", async () => {
+      const initialDbBlogs = await helper.blogsInDb();
+      const blogToUpdate = initialDbBlogs[0];
+
+      const response = await api
+        .put(`/api/blogs/${blogToUpdate.id}`)
+        .send({ likes: 55 })
+        .expect(200);
+      expect(response.body.likes).toBe(55);
+
+      const modifiedDbBlogs = await helper.blogsInDb();
+      const dbUpdatedBlog = modifiedDbBlogs.find(b => b.id === blogToUpdate.id);
+      expect(dbUpdatedBlog.likes).toBe(55);
+    });
+  });
 });
 
 afterAll(() => {
