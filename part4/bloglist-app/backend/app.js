@@ -8,6 +8,8 @@ const app = express();
 
 console.log("connecting to", config.MONGODB_URL);
 
+mongoose.set("useFindAndModify", false);
+
 mongoose
   .connect(config.MONGODB_URL, { useNewUrlParser: true })
   .then(() => {
