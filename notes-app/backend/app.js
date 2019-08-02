@@ -5,16 +5,24 @@ const cors = require("cors");
 const config = require("./utils/config");
 const middleware = require("./utils/middleware");
 const logger = require("./utils/logger");
+
 const notesRouter = require("./controllers/notes");
+const usersRouter = require("./controllers/users");
 
 const app = express();
 
 logger.info("connecting to", config.MONGODB_URL);
 
-mongoose.set("useFindAndModify", false);
+//   used to stop deprecation warning from "findByIdAndUpdate"
+//   (instead of set, option can be passed to mongoose.connect)
+//*     mongoose.set("useFindAndModify", false);
 
 mongoose
-  .connect(config.MONGODB_URL, { useNewUrlParser: true })
+  .connect(config.MONGODB_URL, {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    useCreateIndex: true
+  })
   .then(() => {
     logger.info("connected to MongdoDB");
   })
@@ -30,6 +38,7 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 app.use("/api/notes", notesRouter);
+app.use("/api/users", usersRouter);
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
