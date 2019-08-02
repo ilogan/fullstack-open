@@ -2,21 +2,22 @@ const mongoose = require("mongoose");
 const supertest = require("supertest");
 
 const app = require("../app");
-const Note = require("../models/note");
 const helper = require("./test_helper");
+
+const Note = require("../models/note");
+const User = require("../models/user");
 
 const api = supertest(app);
 
-beforeEach(async () => {
-  await Note.deleteMany({});
-
-  for (let note of helper.initialNotes) {
-    const noteObject = new Note(note);
-    await noteObject.save();
-  }
-});
-
 describe("when there is initially some notes saved", () => {
+  beforeEach(async () => {
+    await Note.deleteMany({});
+
+    for (let note of helper.initialNotes) {
+      const noteObject = new Note(note);
+      await noteObject.save();
+    }
+  });
   test("notes are returned as json", async () => {
     await api
       .get("/api/notes")
@@ -113,6 +114,67 @@ describe("when there is initially some notes saved", () => {
 
       expect(contents).not.toContain(noteToDelete.content);
     });
+  });
+});
+
+describe("when there is initially one user at db", () => {
+  beforeEach(async () => {
+    // delete all users from db
+    await User.deleteMany({});
+
+    // create new user
+    const user = new User({ username: "root", password: "sekret" });
+
+    //save user
+    await user.save();
+  });
+
+  test("creation succeeds with fresh username", async () => {
+    // get initial users from db 1
+    const usersAtStart = await helper.usersInDb();
+
+    // create new user 4
+    const newUser = {
+      username: "mluukkai",
+      name: "Matti Luukkainen",
+      password: "salainen"
+    };
+
+    // post and check new user 5
+    await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(201)
+      .expect("Content-Type", /application\/json/);
+
+    // check that db length is what is should be 2
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd.length).toBe(usersAtStart.length + 1);
+
+    // check that username is in db 2
+    const usernames = usersAtEnd.map(u => u.username);
+    expect(usernames).toContain(newUser.username);
+  });
+
+  test("creation fails with status 400 if username already taken", async () => {
+    const usersAtStart = await helper.usersInDb();
+
+    const newUser = {
+      username: "root",
+      name: "superuser",
+      password: "salainen"
+    };
+
+    const res = await api
+      .post("/api/users")
+      .send(newUser)
+      .expect(400)
+      .expect("Content-Type", /application\/json/);
+
+    expect(res.body.error).toContain("`username` to be unique");
+
+    const usersAtEnd = await helper.usersInDb();
+    expect(usersAtEnd.length).toBe(usersAtStart.length);
   });
 });
 
