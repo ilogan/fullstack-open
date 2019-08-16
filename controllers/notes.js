@@ -1,7 +1,22 @@
 const notesRouter = require("express").Router();
+const jwt = require("jsonwebtoken");
 
 const Note = require("../models/note");
 const User = require("../models/user");
+
+/* UTILITIES */
+const getTokenFrom = req => {
+  try {
+    const authorization = req.get("authorization");
+
+    if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+      return authorization.substring(7);
+    }
+    return null;
+  } catch (e) {
+    console.error(e.message);
+  }
+};
 
 /* READ */
 notesRouter.get("/", async (req, res) => {
@@ -25,10 +40,16 @@ notesRouter.get("/:id", async (req, res, next) => {
 /* CREATE */
 notesRouter.post("/", async (req, res, next) => {
   const body = req.body;
-
-  const user = await User.findById(body.userId);
+  const token = getTokenFrom(req);
 
   try {
+    const decodedToken = jwt.verify(token, process.env.SECRET);
+    if (!token || !decodedToken.id) {
+      return res.status(401).json({ error: "token missing or invalid" });
+    }
+
+    const user = await User.findById(decodedToken.id);
+
     const note = new Note({
       content: body.content,
       important: body.important || false,
